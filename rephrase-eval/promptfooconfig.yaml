@@ -1,0 +1,122 @@
+# =============================================================================
+# FSM Rephraser evaluation — promptfoo config
+#
+# Runs the same dataset against 3 locally-deployed models (llama.cpp,
+# OpenAI-compatible /v1) and scores each output with:
+#   1. Deterministic checks (checks.js)  — numbers/dates/refs, UK spelling,
+#      plain-text-not-JSON, length rules.
+#   2. An LLM rubric graded by Claude     — meaning preserved, tone match,
+#      professionalism, no added info.
+# promptfoo also records latency + token usage automatically (speed eval).
+#
+# Run:   npx promptfoo@latest eval -c promptfooconfig.yaml
+# View:  npx promptfoo@latest view
+# =============================================================================
+
+description: "Joblogic FSM AI Rephrase — accuracy & speed across 3 local models"
+
+prompts:
+  - file://prompts/prompt.js
+
+# --- The three deployed models (edit host/ports if they change) -------------
+providers:
+  - id: openai:chat:gemma-4-e2b
+    label: gemma-4-e2b
+    config:
+      apiBaseUrl: http://10.30.11.110:8011/v1
+      apiKey: sk-local            # llama.cpp ignores the value but the SDK needs one
+      temperature: 0
+      max_tokens: 1024
+      # Ask llama.cpp (started with --jinja) to disable the model's reasoning.
+      chat_template_kwargs:
+        enable_thinking: false
+
+  - id: openai:chat:qwen3.5-2b
+    label: qwen3.5-2b
+    config:
+      apiBaseUrl: http://10.30.11.110:8002/v1
+      apiKey: sk-local
+      temperature: 0
+      max_tokens: 1024
+      # Qwen3 honours enable_thinking=false via its chat template (needs --jinja).
+      chat_template_kwargs:
+        enable_thinking: false
+
+  - id: openai:chat:llama-3.2-3b-instruct
+    label: llama-3.2-3b-instruct
+    config:
+      apiBaseUrl: http://10.30.11.110:8003/v1
+      apiKey: sk-local
+      temperature: 0
+      max_tokens: 1024
+
+# --- Dataset ----------------------------------------------------------------
+tests: file://tests.yaml
+
+# --- Checks applied to EVERY test row ---------------------------------------
+defaultTest:
+  options:
+    # LLM judge for the llm-rubric assertions, via OpenRouter.
+    # Needs an OpenRouter key:  export OPENROUTER_API_KEY=sk-or-...
+    # Judge: Claude Sonnet 4.5 via OpenRouter — most reliable for subjective
+    # rubrics. Confirm the exact slug on https://openrouter.ai/models.
+    # Cheaper alternatives if you scale up the dataset:
+    #   openrouter:openai/gpt-5-mini
+    #   openrouter:google/gemini-2.5-flash
+    #   openrouter:openai/gpt-4o
+    provider:
+      id: openrouter:anthropic/claude-sonnet-4.5
+      config:
+        temperature: 0
+        max_tokens: 256
+
+  assert:
+    # ---- Deterministic (code) checks: the FSM-critical failures ----
+    - type: javascript
+      value: file://checks.js:preserveTokens
+      metric: preserve_details
+    - type: javascript
+      value: file://checks.js:ukSpelling
+      metric: uk_spelling
+    - type: javascript
+      value: file://checks.js:plainTextNotJson
+      metric: output_format
+    - type: javascript
+      value: file://checks.js:lengthRule
+      metric: length_rule
+
+    # ---- Semantic check: Claude as judge, tone/type aware ----
+    - type: llm-rubric
+      metric: semantic_quality
+      value: |
+        You are grading a rephrased Field Service Management (FSM) note.
+
+        Original note: "{{note}}"
+        Requested tone: {{tone}}
+        Requested type: {{type}}
+
+        Score the rephrased OUTPUT as PASS only if ALL hold:
+        1. Meaning fully preserved — no essential detail dropped, no new
+           information, facts, or assumptions introduced.
+        2. Tone matches "{{tone}}" and the processing type "{{type}}"
+           (Make Shorter = more condensed; Make Longer = expanded;
+           Default = same length, just cleaner).
+        3. Professional, industry-appropriate FSM phrasing; grammar and
+           readability improved over the original.
+        4. British English (UK spelling and business language).
+        5. Plain text only — not JSON, and it does not echo the tone/type.
+
+        Fail if any essential number, date, name, price, or job reference is
+        changed or missing. Give a one-sentence reason.
+
+        Note: for the Professional/Default pair, a faithful, lightly-edited
+        version that only improves grammar and clarity is acceptable and
+        should PASS — do not require heavy rewriting when none was requested.
+        Only require a visibly different rewrite when the tone or type asks
+        for it (Concise, Casual, Elaborate, Make Shorter, Make Longer).
+
+    # ---- Speed guardrail: flag egregiously slow responses ----
+    # Captured latency is always reported; this only marks outliers.
+    - type: latency
+      threshold: 20000   # ms — adjust to your on-device SLA
+      metric: latency_guard

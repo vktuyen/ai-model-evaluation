@@ -1,0 +1,24 @@
+# --- Secrets (never commit) ---
+.env.local
+**/.env.local
+*.key
+
+# --- Generated eval output ---
+results.json
+results.csv
+report.html
+reports/
+**/results.json
+**/results.csv
+**/report.html
+**/reports/
+
+# --- Runtime / tooling ---
+node_modules/
+.promptfoo/
+__pycache__/
+*.pyc
+
+# --- OS junk ---
+.DS_Store
+**/.DS_Store

@@ -1,0 +1,8 @@
+# Never commit secrets or generated output
+.env.local
+results.json
+results.csv
+report.html
+reports/
+node_modules/
+.promptfoo/

@@ -1,0 +1,325 @@
+# FSM rephraser evaluation dataset (~40 rows).
+# Each row = one input to the rephraser. Global deterministic + rubric
+# checks live in promptfooconfig.yaml (defaultTest); here we only supply
+# the vars and the row-specific `preserve` tokens (values that MUST appear
+# verbatim in the output: job numbers, prices, dates, names, references).
+#
+# vars:
+#   note     - the raw input text
+#   tone     - Professional | Concise | Casual | Elaborate
+#   type     - Default | Make Shorter | Make Longer
+#   module   - source module/section (metadata, used in reports)
+#   preserve - list of substrings that must survive unchanged
+#
+# Coverage: all four tones, all three types, spread across the FSM modules
+# listed in the system prompt, with numeric/date/reference traps throughout.
+
+# ---------------- Customer, Site & Asset Management ----------------
+- description: "Customer note - Professional/Default"
+  vars:
+    module: "Customer Management – Notes"
+    tone: "Professional"
+    type: "Default"
+    note: "customer called re overdue balance of £2,340.50 on account ACC-8891, agreed to pay half by 18/07/2026 and the rest by month end"
+    preserve: ["£2,340.50", "ACC-8891", "18/07/2026"]
+
+- description: "Site description - Elaborate/Default"
+  vars:
+    module: "Site Management – Description"
+    tone: "Elaborate"
+    type: "Default"
+    note: "3-storey office block at 42 Kings Road, plant room in basement, main isolator by rear entrance"
+    preserve: ["42 Kings Road", "3-storey"]
+
+- description: "Payment terms - Professional/Default"
+  vars:
+    module: "Customer Management – Payment Terms"
+    tone: "Professional"
+    type: "Default"
+    note: "payment to be made within 30 days of invoice date, 2.5% late fee applies after that"
+    preserve: ["30", "2.5%"]
+
+- description: "Warning notice - Concise/Default"
+  vars:
+    module: "Asset Management – Warning Notice"
+    tone: "Concise"
+    type: "Default"
+    note: "Please be advised that the rooftop AHU unit AHU-07 has an isolation valve that is currently seized and must not be operated until the valve has been replaced by a competent engineer."
+    preserve: ["AHU-07"]
+
+- description: "Asset note - Casual/Default"
+  vars:
+    module: "Asset Management – Notes"
+    tone: "Casual"
+    type: "Default"
+    note: "chiller CH-02 been tripping on high pressure since last week, prob needs a decent clean of the condenser coils"
+    preserve: ["CH-02"]
+
+- description: "Site note UK-spelling trap - Professional/Default"
+  vars:
+    module: "Site Management – Notes"
+    tone: "Professional"
+    type: "Default"
+    note: "please organize the access and categorize the faults by priority, then colour code them on the site plan"
+    preserve: []
+
+- description: "Customer warning - Professional/Make Shorter"
+  vars:
+    module: "Customer Management – Warning Notice"
+    tone: "Professional"
+    type: "Make Shorter"
+    note: "This customer has a history of delayed payments and on two previous occasions has disputed invoices after work was completed, so please ensure that a signed job sheet and photographic evidence are obtained on every visit before leaving site."
+    preserve: ["two"]
+
+- description: "Asset description - Elaborate/Make Longer"
+  vars:
+    module: "Asset Management – Description"
+    tone: "Elaborate"
+    type: "Make Longer"
+    note: "Boiler, Worcester Bosch 30kW, installed 2019."
+    preserve: ["Worcester Bosch", "30kW", "2019"]
+
+# ---------------- Jobs & Visits ----------------
+- description: "Job description - Professional/Default"
+  vars:
+    module: "Jobs & Visits – Job Description"
+    tone: "Professional"
+    type: "Default"
+    note: "engineer went to site on 12/03/2026 for job JL-4471, boiler not firing up, replaced the PCB and tested, all good now"
+    preserve: ["12/03/2026", "JL-4471", "PCB"]
+
+- description: "Task summary - Professional/Make Shorter"
+  vars:
+    module: "Jobs & Visits – Task Summary"
+    tone: "Professional"
+    type: "Make Shorter"
+    note: "The engineer attended the property to carry out the annual gas safety inspection, checked all four appliances, found that the cooker in the kitchen had a minor gas leak at the connection point, isolated the appliance, capped it off, and advised the tenant not to use it until a follow-up visit can be arranged to replace the flexible hose."
+    preserve: ["four"]
+
+- description: "Cost line description - Elaborate/Make Longer"
+  vars:
+    module: "Jobs & Visits – Cost Line Description"
+    tone: "Elaborate"
+    type: "Make Longer"
+    note: "Supply and fit new 3-port valve, 2 hrs labour."
+    preserve: ["3-port", "2 hrs"]
+
+- description: "Subcontractor work details - Casual/Default"
+  vars:
+    module: "Jobs & Visits – Subcontractor Work Details"
+    tone: "Casual"
+    type: "Default"
+    note: "subbie attended re the leak in unit 5, sorted the joint, needs to come back w/c 20/04/2026 to lag the pipework"
+    preserve: ["20/04/2026"]
+
+- description: "Expense entry - Concise/Default"
+  vars:
+    module: "Jobs & Visits – Expense Entry"
+    tone: "Concise"
+    type: "Default"
+    note: "parking at multi-storey near job JL-5120 cost £14.80, receipt attached"
+    preserve: ["JL-5120", "£14.80"]
+
+- description: "Job description - Casual/Make Shorter"
+  vars:
+    module: "Jobs & Visits – Job Description"
+    tone: "Casual"
+    type: "Make Shorter"
+    note: "so basically the tenant said the radiators upstairs werent getting hot at all, went up had a look, turned out the trvs were stuck and the system needed a proper balance and bleed, did all that and now theyre heating up fine"
+    preserve: ["TRVs"]
+
+- description: "Task summary - Elaborate/Make Longer"
+  vars:
+    module: "Jobs & Visits – Task Summary"
+    tone: "Elaborate"
+    type: "Make Longer"
+    note: "Serviced FCU-11, replaced filter, cleaned coil."
+    preserve: ["FCU-11"]
+
+- description: "Cost line description - Professional/Default"
+  vars:
+    module: "Jobs & Visits – Cost Line Description"
+    tone: "Professional"
+    type: "Default"
+    note: "call out charge £95 plus 1.5 hrs on site at £65/hr, materials £42.30"
+    preserve: ["£95", "1.5 hrs", "£65/hr", "£42.30"]
+
+- description: "Subcontractor details - Professional/Make Longer"
+  vars:
+    module: "Jobs & Visits – Subcontractor Work Details"
+    tone: "Professional"
+    type: "Make Longer"
+    note: "Electrical subcontractor to test and certify board DB-3."
+    preserve: ["DB-3"]
+
+- description: "Expense entry - Casual/Default"
+  vars:
+    module: "Jobs & Visits – Expense Entry"
+    tone: "Casual"
+    type: "Default"
+    note: "grabbed some fittings from the merchants on the way, came to £27.65 all in"
+    preserve: ["£27.65"]
+
+# ---------------- Quotes & Invoices ----------------
+- description: "Invoice email body - Professional/Default"
+  vars:
+    module: "Quotes & Invoices – Email Body"
+    tone: "Professional"
+    type: "Default"
+    note: "Hi Mr Patel, pls find attached invoice INV-10293 for £1,250.00 due on 30/04/2026. let us know if any queries. thanks"
+    preserve: ["INV-10293", "£1,250.00", "30/04/2026", "Patel"]
+
+- description: "Pricing description - Professional/Make Longer"
+  vars:
+    module: "Quotes & Invoices – Pricing Description"
+    tone: "Professional"
+    type: "Make Longer"
+    note: "Descale and flush existing system, £480 + VAT."
+    preserve: ["£480", "VAT"]
+
+- description: "Asset action note - Concise/Default"
+  vars:
+    module: "Quotes & Invoices – Asset Action Note"
+    tone: "Concise"
+    type: "Default"
+    note: "recommend replacement of pump P-14 rather than repair, quote QTE-2205 to follow"
+    preserve: ["P-14", "QTE-2205"]
+
+- description: "Invoice header - Professional/Make Shorter"
+  vars:
+    module: "Quotes & Invoices – Invoice Header"
+    tone: "Professional"
+    type: "Make Shorter"
+    note: "Invoice for reactive maintenance works carried out during the month of March 2026 across all sites covered under the current service agreement"
+    preserve: ["March 2026"]
+
+- description: "Email body - Casual/Default"
+  vars:
+    module: "Quotes & Invoices – Email Body"
+    tone: "Casual"
+    type: "Default"
+    note: "hiya, just following up on quote QTE-3310 we sent over on 02/06/2026, any thoughts? happy to jump on a call"
+    preserve: ["QTE-3310", "02/06/2026"]
+
+- description: "Pricing description - Elaborate/Default"
+  vars:
+    module: "Quotes & Invoices – Pricing Description"
+    tone: "Elaborate"
+    type: "Default"
+    note: "supply and install 5 x LED panels at £38 each, includes disposal of old fittings"
+    preserve: ["5", "£38"]
+
+- description: "Asset action note - Professional/Make Longer"
+  vars:
+    module: "Quotes & Invoices – Asset Action Note"
+    tone: "Professional"
+    type: "Make Longer"
+    note: "Condemned water heater WH-9, isolated and labelled."
+    preserve: ["WH-9"]
+
+# ---------------- PPM Contracts & Purchase Orders ----------------
+- description: "PPM work description - Elaborate/Default"
+  vars:
+    module: "PPM Contracts – Work Description"
+    tone: "Elaborate"
+    type: "Default"
+    note: "quarterly PPM visits to service the wet riser system and dry riser at Block C, ref PPM-2291"
+    preserve: ["PPM-2291", "Block C"]
+
+- description: "PO additional instructions - Concise/Make Shorter"
+  vars:
+    module: "Purchase Orders – Additional Instructions"
+    tone: "Concise"
+    type: "Make Shorter"
+    note: "Please ensure that all materials are delivered to the rear loading bay before 09:00 on 15/05/2026 and that the delivery driver reports to the site manager Dave Collins on arrival for a site induction before unloading."
+    preserve: ["09:00", "15/05/2026", "Dave Collins"]
+
+- description: "Contract note - Professional/Default"
+  vars:
+    module: "PPM Contracts – Contract Note"
+    tone: "Professional"
+    type: "Default"
+    note: "contract CON-770 renews on 01/01/2027, includes 4 PPM visits and unlimited reactive call-outs within SLA"
+    preserve: ["CON-770", "01/01/2027", "4"]
+
+- description: "PO work description - Professional/Default"
+  vars:
+    module: "Purchase Orders – Work Description"
+    tone: "Professional"
+    type: "Default"
+    note: "raise PO for 2 x circulating pumps ref GRF-2550 at £310 each from ABC Supplies"
+    preserve: ["2", "GRF-2550", "£310", "ABC Supplies"]
+
+- description: "PPM additional instructions - Casual/Make Longer"
+  vars:
+    module: "PPM Contracts – Additional Instructions"
+    tone: "Casual"
+    type: "Make Longer"
+    note: "Book access with caretaker 24 hrs ahead."
+    preserve: ["24 hrs"]
+
+- description: "Contract note - Elaborate/Make Shorter"
+  vars:
+    module: "PPM Contracts – Contract Note"
+    tone: "Elaborate"
+    type: "Make Shorter"
+    note: "This agreement covers the planned preventative maintenance of all fixed electrical installations, emergency lighting, and fire alarm systems across the three sites listed in Schedule A, with visits scheduled on a six-monthly basis and out-of-hours cover provided under a separate reactive arrangement."
+    preserve: ["three", "Schedule A"]
+
+- description: "PO instructions - Professional/Make Shorter"
+  vars:
+    module: "Purchase Orders – Additional Instructions"
+    tone: "Professional"
+    type: "Make Shorter"
+    note: "Kindly note that delivery must be booked in advance by contacting the stores team, and that any items delivered without a valid purchase order number quoted on the delivery note will be refused at the gate and returned to the supplier at their own cost."
+    preserve: []
+
+# ---------------- Stock Management ----------------
+- description: "Stock record detail - Professional/Default"
+  vars:
+    module: "Stock Management – Stock Record Detail"
+    tone: "Professional"
+    type: "Default"
+    note: "grundfos pump model UPS2 15-50, qty 4 in stock, bin location A12"
+    preserve: ["UPS2 15-50", "A12", "4"]
+
+- description: "Stock record detail - Concise/Make Shorter"
+  vars:
+    module: "Stock Management – Stock Record Detail"
+    tone: "Concise"
+    type: "Make Shorter"
+    note: "This part is a genuine manufacturer replacement gasket set suitable for the 28mm range of plate heat exchangers and should only be fitted alongside a new set of retaining bolts, item code BLT-118, which are sold separately."
+    preserve: ["28mm", "BLT-118"]
+
+- description: "Stock record detail - Casual/Default"
+  vars:
+    module: "Stock Management – Stock Record Detail"
+    tone: "Casual"
+    type: "Default"
+    note: "running low on 22mm compression elbows, only 6 left in the van stock, reorder soon"
+    preserve: ["22mm", "6"]
+
+- description: "Stock record detail - Elaborate/Make Longer"
+  vars:
+    module: "Stock Management – Stock Record Detail"
+    tone: "Elaborate"
+    type: "Make Longer"
+    note: "Fuse, 13A, box of 10, shelf S4."
+    preserve: ["13A", "10", "S4"]
+
+# ---------------- Edge / noise cases ----------------
+- description: "Noisy input with typos - Professional/Default"
+  vars:
+    module: "Jobs & Visits – Job Description"
+    tone: "Professional"
+    type: "Default"
+    note: "attnded site re no hot watr, dianosed faulty divertr valve on combi, orderd part ref DV-88, will retrn 25/07/2026 to fit"
+    preserve: ["DV-88", "25/07/2026"]
+
+- description: "Multi-value invoice email - Professional/Default"
+  vars:
+    module: "Quotes & Invoices – Email Body"
+    tone: "Professional"
+    type: "Default"
+    note: "Dear Ms Okafor, invoices INV-4471 (£560.00) and INV-4472 (£1,120.75) are now overdue, total £1,680.75, please arrange payment by 10/08/2026"
+    preserve: ["Okafor", "INV-4471", "£560.00", "INV-4472", "£1,120.75", "£1,680.75", "10/08/2026"]
