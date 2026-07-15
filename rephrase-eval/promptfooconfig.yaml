@@ -23,13 +23,15 @@ providers:
   - id: openai:chat:gemma-4-e2b
     label: gemma-4-e2b
     config:
+      # Served by LiteRT-LM (deploy_local_models_v6.py) — same .litertlm bundle
+      # + runtime the mobile app uses, so this endpoint faithfully reflects
+      # on-device Gemma. NOT the old llama.cpp/GGUF endpoint.
       apiBaseUrl: http://10.30.11.110:8011/v1
-      apiKey: sk-local            # llama.cpp ignores the value but the SDK needs one
+      apiKey: sk-local            # ignored by the local server, but the SDK needs one
       temperature: 0
       max_tokens: 1024
-      # Ask llama.cpp (started with --jinja) to disable the model's reasoning.
-      chat_template_kwargs:
-        enable_thinking: false
+      # No chat_template_kwargs: Gemma has no reasoning mode to suppress, and
+      # that arg was a llama.cpp-only knob. LiteRT-LM may reject unknown kwargs.
 
   - id: openai:chat:qwen3.5-2b
     label: qwen3.5-2b
